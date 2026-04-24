@@ -1,0 +1,1928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PhoneYaps - Your iPhone Finally Has Something to Say</title>
+  <meta name="description" content="PhoneYaps plays custom audio clips when your charger is plugged in, WiFi drops, Bluetooth connects, and more. Your phone finally has something to say.">
+
+  <meta property="og:title" content="PhoneYaps — Your Phone That Yaps Back">
+  <meta property="og:description" content="The iOS app that gives your iPhone a personality — funny audio clips for every battery, WiFi, and Bluetooth event.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://phoneyaps.com/">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="PhoneYaps — Your Phone That Yaps Back">
+  <meta name="twitter:description" content="The iOS app that gives your iPhone a personality — funny audio clips for every battery, WiFi, and Bluetooth event.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" as="style" onload="this.rel='stylesheet'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet"></noscript>
+
+  <style>
+    /* ─── RESET + TOKENS ─── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    :root {
+      --bg:       #111820;
+      --surface:  #1a2028;
+      --card:     #252e36;
+      --card2:    #2e3844;
+      --border:   rgba(104,111,128,0.22);
+      --border2:  rgba(104,111,128,0.38);
+
+      --neon:     #ff6b35;
+      --neon-d:   rgba(255,107,53,0.10);
+      --cyan:     #ff8c5a;
+      --cyan-d:   rgba(255,140,90,0.10);
+      --slate:    #686f80;
+      --slate-d:  rgba(104,111,128,0.12);
+
+      --text:     #e6ecf2;
+      --text2:    #8e97a8;
+      --muted:    #5a6272;
+      --radius:   16px;
+
+      --font-display: 'Bricolage Grotesque', sans-serif;
+      --font-body:    'DM Sans', sans-serif;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.6;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: radial-gradient(circle, rgba(104,111,128,0.18) 1px, transparent 1px);
+      background-size: 32px 32px;
+      pointer-events: none;
+      z-index: 0;
+      mask-image: radial-gradient(ellipse 80% 80% at 50% 0%, black 30%, transparent 100%);
+      -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 0%, black 30%, transparent 100%);
+    }
+
+    /* ─── UTILITY ─── */
+    .container {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 0 clamp(1.25rem, 5vw, 3.5rem);
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ─── NAV ─── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 200;
+      height: 62px;
+      display: flex;
+      align-items: center;
+    }
+
+    .nav-inner {
+      max-width: 1160px;
+      margin: 0 auto;
+      width: 100%;
+      padding: 0 clamp(1.25rem, 5vw, 3.5rem);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(17,24,32,0.85);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border);
+      height: 62px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      text-decoration: none;
+    }
+
+    .nav-logo-icon {
+      width: 30px; height: 30px;
+      background: var(--neon);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .logo-text {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1.15rem;
+      color: var(--text);
+      letter-spacing: -0.02em;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 1.75rem;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text2); }
+
+    .btn-nav {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--neon);
+      color: #0d1520;
+      padding: 0.5rem 1.15rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 2px 20px rgba(255,107,53,0.25);
+    }
+    .btn-nav:hover { transform: translateY(-1px); box-shadow: 0 4px 28px rgba(255,107,53,0.35); }
+
+    /* ─── TICKER ─── */
+    .ticker-wrap {
+      margin-top: 62px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      overflow: hidden;
+      white-space: nowrap;
+      padding: 10px 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .ticker-track {
+      display: inline-flex;
+      animation: ticker 80s linear infinite;
+    }
+
+    .ticker-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-display);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 0 2.5rem;
+    }
+
+    .ticker-item .t-dot {
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: var(--border2);
+      flex-shrink: 0;
+    }
+
+    .ticker-item:nth-child(3n+1) .t-icon { color: var(--neon); }
+    .ticker-item:nth-child(3n+2) .t-icon { color: var(--cyan); }
+    .ticker-item:nth-child(3n+3) .t-icon { color: var(--slate); }
+    .t-icon { font-size: 0.95rem; }
+
+    @keyframes ticker {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* ─── HERO ─── */
+    .hero {
+      padding: clamp(4.5rem, 9vw, 7.5rem) 0 clamp(3.5rem, 7vw, 6rem);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-glow-1 {
+      position: absolute;
+      width: 600px; height: 600px;
+      background: var(--neon);
+      border-radius: 50%;
+      top: -200px; right: -100px;
+      opacity: 0.06;
+      filter: blur(130px);
+      pointer-events: none;
+    }
+
+    .hero-glow-2 {
+      position: absolute;
+      width: 400px; height: 400px;
+      background: var(--cyan);
+      border-radius: 50%;
+      bottom: -100px; left: 10%;
+      opacity: 0.05;
+      filter: blur(110px);
+      pointer-events: none;
+    }
+
+    .hero-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--card);
+      border: 1px solid var(--border2);
+      border-radius: 999px;
+      padding: 0.35rem 0.85rem 0.35rem 0.6rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text2);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+    }
+
+    .badge-dot {
+      width: 7px; height: 7px;
+      background: var(--neon);
+      border-radius: 50%;
+      animation: blink 2.5s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes blink {
+      0%,100% { opacity: 1; }
+      50%      { opacity: 0.3; }
+    }
+
+    h1 {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: clamp(3rem, 6.5vw, 5.5rem);
+      line-height: 1.0;
+      letter-spacing: -0.03em;
+      color: var(--text);
+      margin-bottom: 1.25rem;
+    }
+
+    h1 .hl-n { color: var(--neon); }
+    h1 .hl-c { color: var(--cyan); }
+
+    .hero-desc {
+      font-size: clamp(0.95rem, 1.7vw, 1.05rem);
+      color: var(--text2);
+      line-height: 1.75;
+      max-width: 480px;
+      margin-bottom: 2.25rem;
+    }
+    .hero-desc strong { color: var(--text); font-weight: 600; }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.85rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--neon);
+      color: #0d1520;
+      text-decoration: none;
+      padding: 0.875rem 1.75rem;
+      border-radius: 12px;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: -0.01em;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 28px rgba(255,107,53,0.3);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 36px rgba(255,107,53,0.42); }
+
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: transparent;
+      color: var(--text2);
+      text-decoration: none;
+      padding: 0.875rem 1.5rem;
+      border-radius: 12px;
+      font-weight: 500;
+      font-size: 0.95rem;
+      border: 1px solid var(--border2);
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+    }
+    .btn-ghost:hover { border-color: rgba(104,111,128,0.6); color: var(--text); background: rgba(255,255,255,0.03); }
+
+    .hero-note {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    /* ─── HERO VISUAL: iOS notification banners ─── */
+    .hero-visual {
+      position: relative;
+      height: 520px;
+    }
+
+    .ios-notif {
+      position: absolute;
+      width: 320px;
+      background: rgba(37,46,54,0.94);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--border2);
+      border-radius: 22px;
+      padding: 13px 15px;
+      display: flex;
+      gap: 11px;
+      align-items: flex-start;
+      box-shadow: 0 16px 64px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3);
+      animation: float-notif 5s ease-in-out infinite;
+    }
+
+    .ios-notif:nth-child(1) {
+      top: 20px; right: 0;
+      animation-delay: 0s;
+      border-color: rgba(255,107,53,0.3);
+      box-shadow: 0 16px 64px rgba(0,0,0,0.5), 0 0 28px rgba(255,107,53,0.1);
+    }
+    .ios-notif:nth-child(2) {
+      top: 155px; right: 20px;
+      animation-delay: 0.9s;
+      border-color: rgba(255,107,53,0.22);
+      box-shadow: 0 16px 64px rgba(0,0,0,0.5), 0 0 24px rgba(255,107,53,0.08);
+    }
+    .ios-notif:nth-child(3) {
+      top: 290px; right: 5px;
+      animation-delay: 1.7s;
+      border-color: rgba(255,107,53,0.18);
+      box-shadow: 0 16px 64px rgba(0,0,0,0.5), 0 0 20px rgba(255,107,53,0.06);
+    }
+    .ios-notif:nth-child(4) {
+      top: 400px; right: 35px;
+      animation-delay: 0.5s;
+      border-color: rgba(104,111,128,0.35);
+      box-shadow: 0 16px 64px rgba(0,0,0,0.5), 0 0 20px rgba(104,111,128,0.06);
+    }
+
+    @keyframes float-notif {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-7px); }
+    }
+
+    .notif-app-icon {
+      width: 34px; height: 34px;
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+      flex-shrink: 0;
+    }
+
+    .notif-content { flex: 1; min-width: 0; }
+
+    .notif-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2px;
+    }
+
+    .notif-app {
+      font-size: 0.67rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+    }
+
+    .notif-time {
+      font-size: 0.65rem;
+      color: var(--muted);
+    }
+
+    .notif-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 2px;
+      line-height: 1.3;
+    }
+
+    .notif-body {
+      font-size: 0.78rem;
+      color: var(--text2);
+      line-height: 1.45;
+    }
+
+    .notif-sound {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 7px;
+      font-size: 0.71rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 6px;
+    }
+
+    .sound-neon  { background: rgba(255,107,53,0.1);   color: var(--neon);  }
+    .sound-cyan  { background: rgba(255,140,90,0.1);   color: var(--cyan);  }
+    .sound-slate { background: rgba(104,111,128,0.15); color: #9ba5b0;      }
+
+    .mini-wave {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+    }
+    .mini-wave span {
+      display: block;
+      width: 2px;
+      border-radius: 1px;
+      background: currentColor;
+      animation: mwave 1s ease-in-out infinite;
+    }
+    .mini-wave span:nth-child(1) { height: 5px;  animation-delay: 0s; }
+    .mini-wave span:nth-child(2) { height: 9px;  animation-delay: 0.12s; }
+    .mini-wave span:nth-child(3) { height: 6px;  animation-delay: 0.24s; }
+    .mini-wave span:nth-child(4) { height: 10px; animation-delay: 0.06s; }
+    .mini-wave span:nth-child(5) { height: 5px;  animation-delay: 0.18s; }
+    @keyframes mwave {
+      0%,100% { transform: scaleY(1); }
+      50%      { transform: scaleY(0.3); }
+    }
+
+    /* ─── STAT STRIP ─── */
+    .stat-strip { padding: clamp(3rem, 6vw, 4.5rem) 0; }
+
+    .stat-strip .container {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .stat-item {
+      padding: 2.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 0.5rem;
+      border-right: 1px solid var(--border);
+    }
+    .stat-item:last-child { border-right: none; }
+
+    .stat-num {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 3rem;
+      letter-spacing: -0.05em;
+      color: var(--neon);
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: var(--muted);
+      font-weight: 500;
+      letter-spacing: 0.01em;
+    }
+
+    /* ─── SECTION SHARED ─── */
+    .section-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 0.65rem;
+    }
+    .section-eyebrow::before {
+      content: '';
+      display: block;
+      width: 16px; height: 1.5px;
+      background: var(--border2);
+    }
+
+    .section-heading {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: clamp(2.2rem, 5vw, 3.8rem);
+      letter-spacing: -0.03em;
+      line-height: 1.0;
+      color: var(--text);
+      margin-bottom: 0.65rem;
+    }
+    .section-heading .hl-n { color: var(--neon); }
+    .section-heading .hl-c { color: var(--cyan); }
+    .section-heading .hl-s { color: var(--slate); }
+
+    .section-sub {
+      font-size: 0.95rem;
+      color: var(--text2);
+      line-height: 1.7;
+      max-width: 520px;
+      font-weight: 400;
+    }
+
+    /* ─── TRIGGERS ─── */
+    .triggers { padding: clamp(4rem, 8vw, 6.5rem) 0; }
+
+    .triggers-header { margin-bottom: 3rem; }
+
+    .triggers-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    .trigger-card {
+      background: var(--card);
+      padding: 1.75rem 1.5rem;
+      position: relative;
+      transition: background 0.2s;
+    }
+    .trigger-card:hover { background: var(--card2); }
+
+    .tc-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 0.85rem;
+    }
+
+    .tc-emoji { font-size: 2rem; line-height: 1; }
+
+    .tc-event-tag {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      padding: 0.2rem 0.55rem;
+      border-radius: 5px;
+      border: 1px solid var(--border2);
+      color: var(--muted);
+    }
+
+    .tc-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.05rem;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      margin-bottom: 0.4rem;
+      line-height: 1.25;
+    }
+
+    .tc-quote {
+      font-size: 0.8rem;
+      color: var(--text2);
+      line-height: 1.5;
+      font-style: italic;
+      padding: 0.6rem 0.75rem;
+      background: rgba(255,255,255,0.02);
+      border-left: 2px solid var(--border2);
+      border-radius: 0 6px 6px 0;
+      margin-top: 0.6rem;
+    }
+
+    .tc-quote.neon  { border-left-color: var(--neon);  }
+    .tc-quote.cyan  { border-left-color: var(--cyan);  }
+    .tc-quote.slate { border-left-color: var(--slate); }
+
+    /* ─── TECH DETAILS ─── */
+    .tech-details-wrap { margin-top: 1rem; }
+
+    .tech-details {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .tech-details summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.1rem 1.5rem;
+      cursor: pointer;
+      list-style: none;
+      user-select: none;
+      transition: background 0.2s;
+    }
+    .tech-details summary::-webkit-details-marker { display: none; }
+    .tech-details summary:hover { background: var(--card2); }
+
+    .tech-summary-left {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .tech-summary-label {
+      font-family: var(--font-display);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text2);
+    }
+
+    .tech-arrow {
+      color: var(--slate);
+      transition: transform 0.25s ease;
+      flex-shrink: 0;
+    }
+    .tech-details[open] .tech-arrow { transform: rotate(180deg); }
+
+    .tech-body {
+      padding: 0 1.5rem 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .tech-intro {
+      font-size: 0.875rem;
+      color: var(--text2);
+      line-height: 1.75;
+      padding-top: 1.2rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .tech-rows { display: flex; flex-direction: column; gap: 0.75rem; }
+
+    .tech-row { display: flex; gap: 1rem; align-items: flex-start; }
+
+    .tech-row-tag {
+      font-family: var(--font-display);
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.25rem 0.6rem;
+      border-radius: 5px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .tag-neon  { background: var(--neon-d);  color: var(--neon);  border: 1px solid rgba(255,107,53,0.2);  }
+    .tag-cyan  { background: var(--cyan-d);  color: var(--cyan);  border: 1px solid rgba(255,140,90,0.2);   }
+    .tag-slate { background: var(--slate-d); color: var(--text2); border: 1px solid var(--border);          }
+
+    .tech-row-text {
+      font-size: 0.855rem;
+      color: var(--text2);
+      line-height: 1.75;
+    }
+
+    .tech-footer {
+      margin-top: 1.25rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    /* ─── VOICE PACKS ─── */
+    .voice-packs {
+      padding: clamp(4rem, 8vw, 6.5rem) 0;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .vp-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 2.5rem;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .vp-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+    }
+
+    .vp-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.75rem 1.5rem;
+      transition: border-color 0.25s, transform 0.2s;
+    }
+    .vp-card:hover { transform: translateY(-3px); }
+    .vp-card.featured { border-color: rgba(255,107,53,0.3); }
+    .vp-card:hover.featured { border-color: rgba(255,107,53,0.5); }
+    .vp-card:hover:not(.featured) { border-color: var(--border2); }
+
+    .vp-icon { font-size: 2.25rem; display: block; margin-bottom: 0.75rem; }
+
+    .vp-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.4rem;
+    }
+
+    .vp-name {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.1rem;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+
+    .vp-tag {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 0.2rem 0.55rem;
+      border-radius: 5px;
+    }
+    .tag-in   { background: rgba(255,107,53,0.1);   color: var(--neon); border: 1px solid rgba(255,107,53,0.2); }
+    .tag-soon { background: rgba(104,111,128,0.1);  color: var(--slate); border: 1px solid rgba(104,111,128,0.2); }
+
+    .vp-desc {
+      font-size: 0.85rem;
+      color: var(--text2);
+      line-height: 1.65;
+    }
+
+    .vp-disclaimer {
+      font-size: 0.65rem;
+      color: var(--muted);
+      line-height: 1.4;
+      margin-top: 1rem;
+    }
+
+    /* ─── TESTIMONIALS ─── */
+    .testimonials { padding: 6rem 0 5rem; }
+
+    .testimonials-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+    }
+
+    .testimonial-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.75rem 1.75rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+      transition: border-color 0.2s;
+    }
+    .testimonial-card:hover { border-color: var(--border2); }
+
+    .testimonial-quote-mark {
+      font-size: 2.8rem;
+      line-height: 1;
+      color: var(--neon);
+      font-family: Georgia, serif;
+      margin-bottom: -0.5rem;
+    }
+
+    .testimonial-text {
+      font-size: 0.95rem;
+      color: var(--text2);
+      line-height: 1.65;
+      flex: 1;
+    }
+
+    .testimonial-author {
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-weight: 600;
+      letter-spacing: 0.03em;
+    }
+    .testimonial-author span {
+      color: var(--slate);
+      font-weight: 400;
+    }
+
+    /* ─── PRICING ─── */
+    .pricing {
+      padding: clamp(4rem, 8vw, 6.5rem) 0;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+    }
+
+    .pricing-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: start;
+    }
+
+    .pricing-tagline {
+      font-size: 1.15rem;
+      color: var(--text2);
+      line-height: 1.7;
+      margin-top: 1rem;
+      font-style: italic;
+    }
+
+    .pricing-points {
+      margin-top: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .pp-item {
+      display: flex;
+      gap: 0.85rem;
+      align-items: flex-start;
+    }
+
+    .pp-icon {
+      width: 32px; height: 32px;
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.95rem;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .pp-label {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--text);
+      margin-bottom: 1px;
+    }
+    .pp-sub {
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .pricing-card {
+      background: var(--card);
+      border: 1px solid rgba(255,107,53,0.2);
+      border-radius: 20px;
+      padding: 2.5rem;
+      position: sticky;
+      top: 80px;
+      box-shadow: 0 0 60px rgba(255,107,53,0.04);
+    }
+
+    .price-eyebrow {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--neon);
+      margin-bottom: 0.75rem;
+    }
+
+    .price-row {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+      margin-bottom: 0.25rem;
+    }
+
+    .price-soon {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: clamp(2rem, 5vw, 2.8rem);
+      color: var(--text);
+      line-height: 1;
+      letter-spacing: -0.04em;
+    }
+
+    .price-type {
+      font-size: 0.82rem;
+      color: var(--muted);
+      font-weight: 500;
+      margin-bottom: 1.75rem;
+    }
+
+    .price-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 1.5rem 0;
+    }
+
+    .price-features {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+      margin-bottom: 2rem;
+    }
+
+    .price-features li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.875rem;
+      color: var(--text2);
+      font-weight: 400;
+    }
+
+    .pf-dot {
+      width: 18px; height: 18px;
+      background: var(--neon-d);
+      border: 1px solid rgba(255,107,53,0.3);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.6rem;
+      color: var(--neon);
+      flex-shrink: 0;
+      font-weight: 900;
+    }
+
+    .btn-buy {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      background: var(--neon);
+      color: #0d1520;
+      text-decoration: none;
+      padding: 1rem;
+      border-radius: 12px;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.05rem;
+      letter-spacing: -0.01em;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 24px rgba(255,107,53,0.3);
+    }
+    .btn-buy:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(255,107,53,0.42); }
+
+    .btn-waitlist {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      width: 100%;
+    }
+
+    .waitlist-input-row {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .waitlist-input {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .waitlist-input::placeholder { color: var(--muted); }
+    .waitlist-input:focus { border-color: rgba(255,107,53,0.5); }
+
+    .waitlist-btn {
+      background: var(--neon);
+      color: #0d1520;
+      border: none;
+      border-radius: 10px;
+      padding: 0.75rem 1.25rem;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px rgba(255,107,53,0.28);
+      white-space: nowrap;
+    }
+    .waitlist-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(255,107,53,0.38); }
+
+    .waitlist-note {
+      font-size: 0.76rem;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .buy-note {
+      text-align: center;
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 0.9rem;
+    }
+
+    /* ─── CTA BAND ─── */
+    .cta-band {
+      padding: clamp(5rem, 10vw, 8rem) 0;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-band::before {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 700px; height: 350px;
+      background: radial-gradient(ellipse, rgba(255,107,53,0.07) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .cta-heading {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: clamp(2.5rem, 6vw, 5rem);
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+      margin-bottom: 1rem;
+    }
+
+    .cta-sub {
+      font-size: 1rem;
+      color: var(--text2);
+      max-width: 420px;
+      margin: 0 auto 2.5rem;
+    }
+
+    .cta-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0.875rem;
+    }
+
+    /* ─── FOOTER ─── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2.5rem 0;
+    }
+
+    .footer-inner {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .footer-logo-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 0.75rem;
+    }
+
+    .footer-left { max-width: 380px; }
+
+    .footer-desc {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .footer-disclaimer {
+      margin-top: 0.6rem;
+      font-size: 0.75rem;
+      color: rgba(104,111,128,0.4);
+      line-height: 1.65;
+    }
+
+    .footer-right { display: flex; flex-direction: column; align-items: flex-end; gap: 0.85rem; }
+
+    .footer-links {
+      display: flex;
+      gap: 1.25rem;
+      list-style: none;
+    }
+    .footer-links a {
+      text-decoration: none;
+      font-size: 0.82rem;
+      color: var(--muted);
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--text2); }
+
+    .footer-copy {
+      font-size: 0.75rem;
+      color: rgba(104,111,128,0.4);
+    }
+
+    /* ─── REVEAL ─── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.55s ease, transform 0.55s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ─── ALSO FROM ─── */
+    .also-from {
+      padding: clamp(3.5rem, 7vw, 5rem) 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .also-from-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .also-from-left {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .also-from-eyebrow {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+    }
+
+    .also-from-heading {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.5rem;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+
+    .also-from-desc {
+      font-size: 0.875rem;
+      color: var(--text2);
+    }
+
+    .macyaps-card {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      text-decoration: none;
+      transition: border-color 0.2s, transform 0.2s;
+      max-width: 360px;
+    }
+    .macyaps-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+
+    .macyaps-icon {
+      width: 48px; height: 48px;
+      background: #00c9db22;
+      border: 1px solid rgba(0,201,219,0.2);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .macyaps-info-name {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+
+    .macyaps-info-desc {
+      font-size: 0.8rem;
+      color: var(--text2);
+    }
+
+    .macyaps-arrow {
+      color: var(--muted);
+      margin-left: auto;
+      font-size: 1rem;
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 960px) {
+      .hero-layout { grid-template-columns: 1fr; }
+      .hero-visual { display: none; }
+      .triggers-grid { grid-template-columns: repeat(2, 1fr); }
+      .vp-grid { grid-template-columns: repeat(2, 1fr); }
+      .pricing-layout { grid-template-columns: 1fr; }
+      .pricing-card { position: static; }
+      .also-from-inner { flex-direction: column; }
+      .macyaps-card { max-width: 100%; width: 100%; }
+    }
+
+    @media (max-width: 620px) {
+      .triggers-grid { grid-template-columns: 1fr; }
+      .vp-grid { grid-template-columns: 1fr; }
+      .nav-links { display: none; }
+      .btn-nav { font-size: 0.8rem; padding: 0.45rem 0.9rem; }
+      .stat-strip .container { grid-template-columns: 1fr; }
+      .stat-item { border-right: none; border-bottom: 1px solid var(--border); }
+      .stat-item:last-child { border-bottom: none; }
+      .testimonials-grid { grid-template-columns: 1fr; }
+      .waitlist-input-row { flex-direction: column; }
+      .waitlist-btn { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ───────────── NAV ───────────── -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">
+      <div class="nav-logo-icon">📱</div>
+      <span class="logo-text">PhoneYaps</span>
+    </a>
+    <div class="nav-right">
+      <ul class="nav-links">
+        <li><a href="#triggers">Triggers</a></li>
+        <li><a href="#voice-packs">Voice Packs</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+      </ul>
+      <a href="#pricing" class="btn-nav">Get Notified</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ───────────── TICKER ───────────── -->
+<div class="ticker-wrap" aria-hidden="true">
+  <div class="ticker-track">
+    <span class="ticker-item"><span class="t-icon">🔋</span> Low Battery — "This is the end, my only friend. We are at 10%." <span class="t-dot"></span></span>
+    <span class="ticker-item"><span class="t-icon">🔌</span> Charger Plugged In — "Finally. I was starting to write my will." <span class="t-dot"></span></span>
+    <span class="ticker-item"><span class="t-icon">🪫</span> Charger Unplugged — "Living dangerously again, are we?" <span class="t-dot"></span></span>
+    <span class="ticker-item"><span class="t-icon">💯</span> Fully Charged — "100%. Peak form. Unplug me, coward." <span class="t-dot"></span></span>
+    <span class="ticker-item"><span class="t-icon">📡</span> WiFi Disconnected — *four seconds of sad trombone* <span class="t-dot"></span></span>
+    <span class="ticker-item"><span class="t-icon">📶</span> WiFi Connected — "WE'RE BACK. The dark times are over. For now." <span class="t-dot"></span></span>
+    <span class="ticker-item"><span class="t-icon">🔵</span> Bluetooth Connected — "Device joined. Unknown intentions. Scanning for vibes." <span class="t-dot"></span></span>
+    <span class="ticker-item"><span class="t-icon">📵</span> Bluetooth Disconnected — "Gone without warning. As all good things are." <span class="t-dot"></span></span>
+    <span class="ticker-item"><span class="t-icon">🔋</span> Low Battery — "This is the end, my only friend. We are at 10%." <span class="t-dot"></span></span>
+    <span class="ticker-item"><span class="t-icon">🔌</span> Charger Plugged In — "Finally. I was starting to write my will." <span class="t-dot"></span></span>
+    <span class="ticker-item"><span class="t-icon">🪫</span> Charger Unplugged — "Living dangerously again, are we?" <span class="t-dot"></span></span>
+    <span class="ticker-item"><span class="t-icon">💯</span> Fully Charged — "100%. Peak form. Unplug me, coward." <span class="t-dot"></span></span>
+    <span class="ticker-item"><span class="t-icon">📡</span> WiFi Disconnected — *four seconds of sad trombone* <span class="t-dot"></span></span>
+    <span class="ticker-item"><span class="t-icon">📶</span> WiFi Connected — "WE'RE BACK. The dark times are over. For now." <span class="t-dot"></span></span>
+    <span class="ticker-item"><span class="t-icon">🔵</span> Bluetooth Connected — "Device joined. Unknown intentions. Scanning for vibes." <span class="t-dot"></span></span>
+    <span class="ticker-item"><span class="t-icon">📵</span> Bluetooth Disconnected — "Gone without warning. As all good things are." <span class="t-dot"></span></span>
+  </div>
+</div>
+
+<!-- ───────────── HERO ───────────── -->
+<section class="hero">
+  <div class="hero-glow-1" aria-hidden="true"></div>
+  <div class="hero-glow-2" aria-hidden="true"></div>
+  <div class="container">
+    <div class="hero-layout">
+
+      <div class="hero-left">
+        <div class="hero-badge">
+          <span class="badge-dot"></span>
+          Coming to the App Store
+        </div>
+        <h1>
+          Your phone<br>
+          <span class="hl-n">finally</span> has<br>
+          something to say.
+        </h1>
+
+        <p class="hero-desc">
+          PhoneYaps plays custom audio clips when things happen on your iPhone.
+          <br><br>
+          Charger plugged in? WiFi drops? Bluetooth device connects? It yaps.
+          <br><br>
+          From funny to professional — <strong>pick a voice pack, or bring your own sounds. Your phone, your personality.</strong>
+        </p>
+
+        <div class="hero-actions">
+          <a href="#pricing" class="btn-primary">
+            Get Notified at Launch
+          </a>
+          <a href="#triggers" class="btn-ghost">
+            See all triggers →
+          </a>
+        </div>
+
+        <p class="hero-note">
+          <span>📱</span> iOS 17+ iPhone · Free to try · One-time purchase
+        </p>
+      </div>
+
+      <!-- Floating iOS-style notification banners -->
+      <div class="hero-visual" aria-hidden="true">
+
+        <div class="ios-notif">
+          <div class="notif-app-icon" style="background: rgba(255,107,53,0.15);">🔋</div>
+          <div class="notif-content">
+            <div class="notif-header">
+              <div class="notif-app">PhoneYaps · Battery</div>
+              <div class="notif-time">now</div>
+            </div>
+            <div class="notif-title">Battery at 10%</div>
+            <div class="notif-body">Your phone would like a word.</div>
+            <div class="notif-sound sound-neon">
+              <span class="mini-wave"><span></span><span></span><span></span><span></span><span></span></span>
+              Dramatic Opera
+            </div>
+          </div>
+        </div>
+
+        <div class="ios-notif">
+          <div class="notif-app-icon" style="background: rgba(255,107,53,0.12);">🔌</div>
+          <div class="notif-content">
+            <div class="notif-header">
+              <div class="notif-app">PhoneYaps · Power</div>
+              <div class="notif-time">1m ago</div>
+            </div>
+            <div class="notif-title">Charger Plugged In</div>
+            <div class="notif-body">"Finally, you peasant."</div>
+            <div class="notif-sound sound-cyan">
+              <span class="mini-wave"><span></span><span></span><span></span><span></span><span></span></span>
+              Roast Master
+            </div>
+          </div>
+        </div>
+
+        <div class="ios-notif">
+          <div class="notif-app-icon" style="background: rgba(255,107,53,0.08);">📡</div>
+          <div class="notif-content">
+            <div class="notif-header">
+              <div class="notif-app">PhoneYaps · WiFi</div>
+              <div class="notif-time">2m ago</div>
+            </div>
+            <div class="notif-title">WiFi Disconnected</div>
+            <div class="notif-body">*sad trombone intensifies*</div>
+            <div class="notif-sound sound-cyan">
+              <span class="mini-wave"><span></span><span></span><span></span><span></span><span></span></span>
+              Sad Trombone
+            </div>
+          </div>
+        </div>
+
+        <div class="ios-notif">
+          <div class="notif-app-icon" style="background: rgba(104,111,128,0.15);">🔵</div>
+          <div class="notif-content">
+            <div class="notif-header">
+              <div class="notif-app">PhoneYaps · Bluetooth</div>
+              <div class="notif-time">5m ago</div>
+            </div>
+            <div class="notif-title">AirPods Connected</div>
+            <div class="notif-body">"Device joined. What's your deal?"</div>
+            <div class="notif-sound sound-slate">
+              <span class="mini-wave"><span></span><span></span><span></span><span></span><span></span></span>
+              Cheeky Irish Lad
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────── STATS ───────────── -->
+<div class="stat-strip">
+  <div class="container">
+    <div class="stat-item reveal">
+      <div class="stat-num">8</div>
+      <div class="stat-label">System triggers</div>
+    </div>
+    <div class="stat-item reveal">
+      <div class="stat-num">7+</div>
+      <div class="stat-label">Built-in voice packs</div>
+    </div>
+    <div class="stat-item reveal">
+      <div class="stat-num">0</div>
+      <div class="stat-label">Subscriptions, ever</div>
+    </div>
+  </div>
+</div>
+
+<!-- ───────────── TRIGGERS ───────────── -->
+<section class="triggers" id="triggers">
+  <div class="container">
+    <div class="triggers-header reveal">
+      <div class="section-eyebrow">Every trigger</div>
+      <h2 class="section-heading">Your phone's inner<br><span class="hl-n">monologue,</span> unleashed.</h2>
+      <p class="section-sub">All the things that happen quietly in your pocket? PhoneYaps turns them into a moment.</p>
+    </div>
+
+    <div class="triggers-grid reveal">
+
+      <div class="trigger-card">
+        <div class="tc-header">
+          <span class="tc-emoji">🔋</span>
+          <span class="tc-event-tag">Battery</span>
+        </div>
+        <div class="tc-title">Low Battery — Customizable Thresholds</div>
+        <div class="tc-quote neon">"This is the end, my only friend. We are at 10%."</div>
+      </div>
+
+      <div class="trigger-card">
+        <div class="tc-header">
+          <span class="tc-emoji">🔌</span>
+          <span class="tc-event-tag">Battery</span>
+        </div>
+        <div class="tc-title">Charger Plugged In</div>
+        <div class="tc-quote cyan">"Finally. I was starting to write my will."</div>
+      </div>
+
+      <div class="trigger-card">
+        <div class="tc-header">
+          <span class="tc-emoji">🪫</span>
+          <span class="tc-event-tag">Battery</span>
+        </div>
+        <div class="tc-title">Charger Unplugged</div>
+        <div class="tc-quote slate">"Oh great. Living dangerously again, are we?"</div>
+      </div>
+
+      <div class="trigger-card">
+        <div class="tc-header">
+          <span class="tc-emoji">💯</span>
+          <span class="tc-event-tag">Battery</span>
+        </div>
+        <div class="tc-title">Fully Charged</div>
+        <div class="tc-quote neon">"100%. Peak form. Absolute unit. Unplug me, coward."</div>
+      </div>
+
+      <div class="trigger-card">
+        <div class="tc-header">
+          <span class="tc-emoji">📡</span>
+          <span class="tc-event-tag">WiFi</span>
+        </div>
+        <div class="tc-title">WiFi Disconnected</div>
+        <div class="tc-quote slate">*four seconds of uninterrupted sad trombone*</div>
+      </div>
+
+      <div class="trigger-card">
+        <div class="tc-header">
+          <span class="tc-emoji">📶</span>
+          <span class="tc-event-tag">WiFi</span>
+        </div>
+        <div class="tc-title">WiFi Connected</div>
+        <div class="tc-quote cyan">"WE'RE BACK. The dark times are over. For now."</div>
+      </div>
+
+      <div class="trigger-card">
+        <div class="tc-header">
+          <span class="tc-emoji">🔵</span>
+          <span class="tc-event-tag">Bluetooth</span>
+        </div>
+        <div class="tc-title">Bluetooth Device Connected</div>
+        <div class="tc-quote neon">"Device joined. Unknown intentions. Scanning for vibes."</div>
+      </div>
+
+      <div class="trigger-card">
+        <div class="tc-header">
+          <span class="tc-emoji">📵</span>
+          <span class="tc-event-tag">Bluetooth</span>
+        </div>
+        <div class="tc-title">Bluetooth Device Disconnected</div>
+        <div class="tc-quote slate">"Gone without warning. As all good things are."</div>
+      </div>
+
+      <div class="trigger-card">
+        <div class="tc-header">
+          <span class="tc-emoji">🔜</span>
+          <span class="tc-event-tag">More to come</span>
+        </div>
+        <div class="tc-title">More triggers coming. Free updates forever.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ─── TECH DETAILS ─── -->
+  <div class="tech-details-wrap">
+    <div class="container">
+      <details class="tech-details">
+        <summary>
+          <div class="tech-summary-left">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--slate);flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span class="tech-summary-label">How these triggers actually work on iOS</span>
+          </div>
+          <svg class="tech-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </summary>
+        <div class="tech-body">
+          <p class="tech-intro">PhoneYaps uses Apple's native iOS frameworks to listen for events — no battery drain, no sketchy background tricks.</p>
+          <div class="tech-rows">
+            <div class="tech-row">
+              <span class="tech-row-tag tag-neon">Battery</span>
+              <p class="tech-row-text">UIDevice delivers push notifications the moment the system detects a power source or charge level change. PhoneYaps registers a callback and reacts instantly.</p>
+            </div>
+            <div class="tech-row">
+              <span class="tech-row-tag tag-cyan">WiFi</span>
+              <p class="tech-row-text">NWPathMonitor (Apple's Network framework) pushes an event when the network path changes — drops, reconnects, or switches between cellular and WiFi.</p>
+            </div>
+            <div class="tech-row">
+              <span class="tech-row-tag tag-slate">Bluetooth</span>
+              <p class="tech-row-text">CBCentralManager monitors nearby peripherals. PhoneYaps diffs the connected device set every few seconds to detect connects and disconnects without draining the radio.</p>
+            </div>
+            <div class="tech-row">
+              <span class="tech-row-tag tag-slate">Background</span>
+              <p class="tech-row-text">iOS limits background execution for non-system apps. PhoneYaps works best when open or recently backgrounded. If iOS suspends it, the app schedules a reminder notification so you can bring it back.</p>
+            </div>
+          </div>
+          <p class="tech-footer">The result: minimal battery impact while the app is active, and honest about the limits iOS places on background apps.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────── VOICE PACKS ───────────── -->
+<section class="voice-packs" id="voice-packs">
+  <div class="container">
+    <div class="vp-header reveal">
+      <div>
+        <div class="section-eyebrow">Voice packs</div>
+        <h2 class="section-heading">Pick your<br><span class="hl-c">phone's personality.</span></h2>
+      </div>
+      <p class="section-sub" style="max-width: 340px;">Swap voice packs to match your vibe. Or just rotate them until your contacts are concerned about you.</p>
+    </div>
+
+    <div class="vp-grid">
+
+      <div class="vp-card reveal">
+        <span class="vp-icon">🍀</span>
+        <div class="vp-top">
+          <div class="vp-name">Cheeky Irish Lad</div>
+          <span class="vp-tag tag-in">Included</span>
+        </div>
+        <p class="vp-desc">A lad with opinions. Low battery? "Ah Jaysus, would ya not plug that in." Every event gets a sarcastic Dublin commentary.</p>
+      </div>
+
+      <div class="vp-card reveal">
+        <span class="vp-icon">🎭</span>
+        <div class="vp-top">
+          <div class="vp-name">Italian Opera Man</div>
+          <span class="vp-tag tag-in">Included</span>
+        </div>
+        <p class="vp-desc">WiFi drops? Full aria. Charger plugged in? Triumphant overture. Your phone has become a one-man opera and nothing is proportionate.</p>
+      </div>
+
+      <div class="vp-card reveal">
+        <span class="vp-icon">😈</span>
+        <div class="vp-top">
+          <div class="vp-name">Memes</div>
+          <span class="vp-tag tag-in">Included</span>
+        </div>
+        <p class="vp-desc">Classic internet chaos energy. Vine booms, bruh sounds, distorted audio from clips you forgot existed. For the reckless.</p>
+      </div>
+
+      <div class="vp-card reveal">
+        <span class="vp-icon">🗽</span>
+        <div class="vp-top">
+          <div class="vp-name">New Yorker</div>
+          <span class="vp-tag tag-in">Included</span>
+        </div>
+        <p class="vp-desc">No patience, no filter, no time for this. Bluetooth disconnected? "REALLY?!" Battery low? "What is WRONG with you." Pure New York energy.</p>
+      </div>
+
+      <div class="vp-card reveal">
+        <span class="vp-icon">🦘</span>
+        <div class="vp-top">
+          <div class="vp-name">Thick Australian</div>
+          <span class="vp-tag tag-in">Included</span>
+        </div>
+        <p class="vp-desc">Crikey, the battery's at 10%! She'll be right, mate — except she won't be. Sun's out, volume's up, and your phone's havin' a ripper time.</p>
+      </div>
+
+      <div class="vp-card reveal">
+        <span class="vp-icon">💅</span>
+        <div class="vp-top">
+          <div class="vp-name">Valley Girl</div>
+          <span class="vp-tag tag-in">Included</span>
+        </div>
+        <p class="vp-desc">Oh. My. God. Your battery is literally dying right now. Like, why would you even do this? Charger connected? "Yaaaas, slay queen."</p>
+      </div>
+
+      <div class="vp-card reveal">
+        <span class="vp-icon">🏎️</span>
+        <div class="vp-top">
+          <div class="vp-name">British Race Car Commentator</div>
+          <span class="vp-tag tag-in">Included</span>
+        </div>
+        <p class="vp-desc">That unmistakable rapid-fire British voice — crisp, urgent, slightly too intense for the situation. Battery dying never sounded so professionally catastrophic.</p>
+      </div>
+
+      <div class="vp-card reveal">
+        <span class="vp-icon">📂</span>
+        <div class="vp-top">
+          <div class="vp-name">Bring Your Own</div>
+          <span class="vp-tag tag-in">Included</span>
+        </div>
+        <p class="vp-desc">Import any audio file from your phone and assign it to any trigger. Your sounds, your phone, your chaos. Total creative control.</p>
+        <p class="vp-disclaimer">You are solely responsible for any audio files you add to PhoneYaps. Ensure they do not infringe copyrights, trademarks, or third-party rights.</p>
+      </div>
+
+      <div class="vp-card reveal">
+        <span class="vp-icon">🔜</span>
+        <div class="vp-top">
+          <div class="vp-name">More to come</div>
+          <span class="vp-tag tag-soon">Coming soon</span>
+        </div>
+        <p class="vp-desc">More voice packs coming soon. Free updates forever.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ───────────── TESTIMONIALS ───────────── -->
+<section class="testimonials">
+  <div class="container">
+    <div class="testimonials-header reveal">
+      <div class="section-eyebrow">From the community</div>
+      <h2 class="section-heading">People are <span class="hl-n">talking.</span></h2>
+    </div>
+    <div class="testimonials-grid">
+      <div class="testimonial-card reveal">
+        <div class="testimonial-quote-mark">&ldquo;</div>
+        <p class="testimonial-text">Instant purchase (bought before I saw the PH coupon code). Fantastic idea really well executed. I love the sound packs included. Literally LOL'd at the Cheeky Irish Guy! He's my new favourite!</p>
+        <div class="testimonial-author">Craig P. <span>· via Product Hunt</span></div>
+      </div>
+      <div class="testimonial-card reveal">
+        <div class="testimonial-quote-mark">&ldquo;</div>
+        <p class="testimonial-text">The voice packs sound like the main attraction. Savage New Yorker reacting to low battery is something I didn't know I needed 😂</p>
+        <div class="testimonial-author">Alan G. <span>· via Product Hunt</span></div>
+      </div>
+      <div class="testimonial-card reveal">
+        <div class="testimonial-quote-mark">&ldquo;</div>
+        <p class="testimonial-text">Very smart! Love the idea! Congratulations on the launch!</p>
+        <div class="testimonial-author">Antonin K. <span>· via Product Hunt</span></div>
+      </div>
+      <div class="testimonial-card reveal">
+        <div class="testimonial-quote-mark">&ldquo;</div>
+        <p class="testimonial-text">Love it, keep up the good work!</p>
+        <div class="testimonial-author">Robert H. <span>· via Product Hunt</span></div>
+      </div>
+      <div class="testimonial-card reveal">
+        <div class="testimonial-quote-mark">&ldquo;</div>
+        <p class="testimonial-text">Really sharp launch, giving your system real-time personality like this is a fun but actually underrated shift — especially when it's tied to real events like battery drops and connection changes instead of just static automation.</p>
+        <div class="testimonial-author">@ctranbtw <span>· via X</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────── PRICING ───────────── -->
+<section class="pricing" id="pricing">
+  <div class="container">
+    <div class="pricing-layout">
+
+      <div class="pricing-left reveal">
+        <div class="section-eyebrow">Pricing</div>
+        <h2 class="section-heading">No tricks.<br><span class="hl-n">No subscription.</span></h2>
+        <p class="pricing-tagline">Pay once, yap forever. That's the whole deal.</p>
+
+        <div class="pricing-points">
+          <div class="pp-item">
+            <div class="pp-icon">🔒</div>
+            <div>
+              <div class="pp-label">One-time purchase</div>
+              <div class="pp-sub">No monthly fees, no "pro tier", no gotcha.</div>
+            </div>
+          </div>
+          <div class="pp-item">
+            <div class="pp-icon">♾️</div>
+            <div>
+              <div class="pp-label">Free updates forever</div>
+              <div class="pp-sub">New triggers and voice packs land in your copy automatically.</div>
+            </div>
+          </div>
+          <div class="pp-item">
+            <div class="pp-icon">🛡️</div>
+            <div>
+              <div class="pp-label">No account required</div>
+              <div class="pp-sub">No sign-up, no email harvesting. Ever.</div>
+            </div>
+          </div>
+          <div class="pp-item">
+            <div class="pp-icon">📱</div>
+            <div>
+              <div class="pp-label">iOS 17+ iPhone only</div>
+              <div class="pp-sub">iPhone running iOS 17 or later.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pricing-card reveal">
+        <div class="price-eyebrow">PhoneYaps · Full License</div>
+        <div class="price-row">
+          <span class="price-soon">Coming to the App Store</span>
+        </div>
+
+        <div class="price-type" style="margin-bottom: 0.5rem; margin-top: 0.5rem;">One-time · Lifetime license · All future updates included</div>
+        <div class="price-divider"></div>
+        <ul class="price-features">
+          <li><span class="pf-dot">✓</span> All 8 system triggers (battery, WiFi, Bluetooth — with configurable thresholds)</li>
+          <li><span class="pf-dot">✓</span> 7+ built-in voice packs included (more to come)</li>
+          <li><span class="pf-dot">✓</span> Custom audio import — bring your own sounds</li>
+          <li><span class="pf-dot">✓</span> Per-trigger sound selection & toggle controls</li>
+          <li><span class="pf-dot">✓</span> Single or shuffle playback mode</li>
+          <li><span class="pf-dot">✓</span> Free updates, including new packs and triggers, forever</li>
+        </ul>
+
+        <div class="btn-waitlist">
+          <div class="waitlist-input-row">
+            <input type="email" class="waitlist-input" placeholder="your@email.com">
+            <button class="waitlist-btn" onclick="handleWaitlist(this)">Notify me</button>
+          </div>
+          <p class="waitlist-note">Get notified when PhoneYaps hits the App Store. No spam, ever.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ───────────── ALSO FROM ───────────── -->
+<section class="also-from">
+  <div class="container">
+    <div class="also-from-inner reveal">
+      <div class="also-from-left">
+        <div class="also-from-eyebrow">From the same indie dev</div>
+        <div class="also-from-heading">Already on a Mac?</div>
+        <p class="also-from-desc">MacYaps is the original — a menu bar app that yaps for your laptop.</p>
+      </div>
+      <a href="https://macyaps.com" target="_blank" rel="noopener" class="macyaps-card">
+        <div class="macyaps-icon">💻</div>
+        <div>
+          <div class="macyaps-info-name">MacYaps</div>
+          <div class="macyaps-info-desc">The Mac app that yaps back. $8.99 · macOS 13+</div>
+        </div>
+        <span class="macyaps-arrow">→</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────── CTA ───────────── -->
+<section class="cta-band">
+  <div class="container">
+    <h2 class="cta-heading reveal">
+      Your phone has been<br>
+      <span style="color: var(--neon);">too quiet</span> for too long.
+    </h2>
+    <p class="cta-sub reveal">Give it a personality. A funny one, a serious one, or both. Your choice.</p>
+    <div class="cta-actions reveal">
+      <a href="#pricing" class="btn-primary" style="font-size: 1.05rem; padding: 0.95rem 2rem;">
+        Get Notified at Launch
+      </a>
+      <a href="#triggers" class="btn-ghost">
+        See all triggers →
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────── FOOTER ───────────── -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-left">
+        <div class="footer-logo-row">
+          <div class="nav-logo-icon" style="width:26px;height:26px;font-size:14px;border-radius:6px;">📱</div>
+          <span class="logo-text" style="font-size:1.05rem;">PhoneYaps</span>
+        </div>
+        <p class="footer-desc">
+          An iOS app that plays funny audio clips when your phone does things.
+          Built by an indie developer. No VC, no dark patterns, no subscription.
+        </p>
+        <p class="footer-disclaimer">
+          PhoneYaps ships with original audio thanks to ElevenLabs. You are solely responsible for any audio files you add to PhoneYaps. Make sure they do not infringe copyrights, trademarks, or other third-party rights. PhoneYaps is not liable for embarrassing moments during video calls.
+        </p>
+      </div>
+      <div class="footer-right">
+        <ul class="footer-links">
+          <li><a href="mailto:support@hackem.app">Contact</a></li>
+        </ul>
+        <p class="footer-copy">© 2026 PhoneYaps. All rights reserved.</p>
+        <a href="https://amore.computer" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:6px;text-decoration:none;opacity:0.5;transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.5'">
+          <span style="font-size:0.72rem;color:var(--muted);font-weight:500;">Built with Amore</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Scroll-reveal
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // Stagger grid items
+  document.querySelectorAll('.triggers-grid, .vp-grid, .stat-strip .container, .testimonials-grid').forEach(grid => {
+    Array.from(grid.children).forEach((child, i) => {
+      child.classList.add('reveal');
+      child.style.transitionDelay = `${i * 0.06}s`;
+      observer.observe(child);
+    });
+  });
+
+  // Pause ticker on hover
+  const tickerTrack = document.querySelector('.ticker-track');
+  const tickerWrap  = document.querySelector('.ticker-wrap');
+  if (tickerWrap && tickerTrack) {
+    tickerWrap.addEventListener('mouseenter', () => tickerTrack.style.animationPlayState = 'paused');
+    tickerWrap.addEventListener('mouseleave', () => tickerTrack.style.animationPlayState = 'running');
+  }
+
+  // Waitlist form
+  function handleWaitlist(btn) {
+    const input = btn.previousElementSibling;
+    const email = input.value.trim();
+    if (!email || !email.includes('@')) {
+      input.style.borderColor = 'rgba(255,107,53,0.6)';
+      input.focus();
+      return;
+    }
+    btn.textContent = 'Added ✓';
+    btn.style.background = '#2e3844';
+    btn.style.color = 'var(--text2)';
+    btn.style.boxShadow = 'none';
+    btn.disabled = true;
+    input.disabled = true;
+    input.style.opacity = '0.5';
+  }
+</script>
+
+</body>
+</html>
